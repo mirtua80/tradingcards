@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cromos Mundial 2026</title>
+
+<!-- ============================================================
+  FIREBASE — rellena tu configuración aquí (ver instrucciones)
+============================================================= -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root{
+  --bg:#F4F6F0; --surface:#FFFFFF; --surface-2:#EAF0E6; --line:#D7DECF;
+  --text:#1C2419; --text-dim:#5E6D5A; --gold:#B9821E; --teal:#1E8A6E; --rust:#B85229;
+  --foil-a:#E7B84B; --foil-b:#3FA37E; --foil-c:#8FD9BE; --radius:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+#app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:76px;}
+h1,h2,h3{font-family:'Big Shoulders Display',sans-serif;font-weight:800;letter-spacing:0.01em;margin:0;text-transform:uppercase;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+.setup-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 24px;}
+.setup-title{font-size:38px;line-height:0.95;color:var(--text);}
+.setup-title span{color:var(--gold);}
+.setup-sub{color:var(--text-dim);font-size:14px;margin:10px 0 28px;line-height:1.5;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;}
+.field input,.field textarea{width:100%;background:var(--surface);border:1px solid var(--line);color:var(--text);padding:13px 14px;border-radius:var(--radius);font-size:16px;font-family:inherit;}
+.field textarea{font-family:'IBM Plex Mono';font-size:12px;min-height:140px;resize:vertical;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--gold);}
+.field-hint{font-size:12px;color:var(--text-dim);margin-top:6px;}
+.btn{background:var(--gold);color:#14201A;border:none;padding:14px 20px;border-radius:var(--radius);font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;font-size:16px;cursor:pointer;width:100%;}
+.btn:active{transform:translateY(1px);}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text);}
+.btn-danger{background:var(--rust);color:#fff;}
+.btn-small{width:auto;padding:8px 14px;font-size:13px;border-radius:8px;}
+.link-btn{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;}
+
+header.topbar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:14px 18px 12px;}
+.topbar-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.topbar-row h1{font-size:22px;}
+.topbar-row .group-code{font-size:11px;color:var(--text-dim);}
+.progress-track{height:8px;background:var(--surface);border-radius:6px;overflow:hidden;border:1px solid var(--line);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-top:6px;font-family:'IBM Plex Mono',monospace;}
+
+nav.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:flex;max-width:560px;margin:0 auto;}
+nav.tabbar button{flex:1;background:none;border:none;color:var(--text-dim);padding:12px 4px 10px;font-family:'IBM Plex Sans';font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
+nav.tabbar button .ic{font-size:18px;}
+nav.tabbar button.active{color:var(--gold);}
+nav.tabbar button .badge{position:absolute;top:2px;right:14px;background:var(--rust);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-family:'IBM Plex Mono';}
+
+main{flex:1;padding:16px 16px 24px;}
+
+.team-section{margin-bottom:22px;}
+.team-header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 8px 2px;border-bottom:1px dashed var(--line);margin-bottom:10px;cursor:pointer;}
+.team-header h3{font-size:15px;color:var(--text);}
+.team-header .count{font-family:'IBM Plex Mono';font-size:12px;color:var(--text-dim);}
+.sticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;}
+.sticker{min-height:112px;border-radius:6px;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:'IBM Plex Mono';font-size:10px;user-select:none;transition:transform .1s;text-align:center;padding:8px 4px;gap:4px;}
+.sticker:active{transform:scale(0.94);}
+.sticker.falta{background:transparent;border:1px dashed var(--line);color:var(--text-dim);opacity:0.55;}
+.sticker.tengo{background:var(--surface-2);border:1px solid var(--teal);color:var(--text);box-shadow:0 2px 0 rgba(0,0,0,.3);}
+.sticker.repetido{background:linear-gradient(135deg,var(--foil-a),var(--foil-b) 60%,var(--foil-c));color:#14201A;border:1px solid var(--gold);box-shadow:0 2px 0 rgba(0,0,0,.35);transform:rotate(-1.2deg);}
+.sticker .num{font-weight:700;font-size:11px;}
+.sticker .pname{font-family:'IBM Plex Sans';font-size:10px;line-height:1.2;font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;}
+.sticker.falta .pname{opacity:0.85;}
+.sticker .dup-badge{position:absolute;top:-6px;right:-6px;background:var(--rust);color:#fff;border-radius:9px;font-size:9px;padding:1px 5px;font-family:'IBM Plex Mono';}
+.pphoto{width:34px;height:34px;border-radius:50%;overflow:hidden;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:11px;color:var(--text-dim);flex-shrink:0;border:1px solid var(--line);}
+.sticker.tengo .pphoto,.sticker.repetido .pphoto{border-color:rgba(0,0,0,.2);}
+.pphoto img{width:100%;height:100%;object-fit:cover;display:block;}
+.pinit{font-weight:700;}
+.section-nav{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.section-nav select{
+  flex:1;background:var(--surface);border:1px solid var(--line);color:var(--text);
+  padding:11px 12px;border-radius:var(--radius);font-size:14px;font-family:'IBM Plex Sans';
+  font-weight:600;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%235E6D5A'><path d='M5.5 7.5l4.5 4.5 4.5-4.5' stroke='%235E6D5A' stroke-width='1.5' fill='none'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
+}
+.section-nav select:focus{outline:none;border-color:var(--gold);}
+.nav-arrow{
+  flex-shrink:0;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+  background:var(--surface);color:var(--text);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.nav-arrow:active{background:var(--surface-2);}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;font-size:11px;color:var(--text-dim);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+.leg-falta{border:1px dashed var(--line);}
+.leg-tengo{background:var(--surface-2);border:1px solid var(--teal);}
+.leg-rep{background:linear-gradient(135deg,var(--foil-a),var(--foil-b));}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.row + .row{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+.item-name{font-size:14px;}
+.item-sub{font-size:11px;color:var(--text-dim);font-family:'IBM Plex Mono';}
+.stepper{display:flex;align-items:center;gap:8px;}
+.stepper button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-size:15px;cursor:pointer;line-height:1;}
+.pill{border:1px solid var(--line);background:var(--surface-2);color:var(--text-dim);border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;}
+.pill.on{background:var(--gold);color:#14201A;border-color:var(--gold);font-weight:600;}
+.friend-progress{flex:1;height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin:0 10px;border:1px solid var(--line);}
+.friend-progress i{display:block;height:100%;background:var(--teal);}
+.empty-state{padding:40px 20px;text-align:center;color:var(--text-dim);font-size:13px;line-height:1.6;}
+.empty-state h3{color:var(--text);font-size:18px;margin-bottom:8px;}
+.section-title{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin:20px 0 10px;}
+.section-title:first-child{margin-top:0;}
+.interest-flag{color:var(--gold);font-size:11px;}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;}
+.modal{background:var(--surface);width:100%;max-width:560px;margin:0 auto;border-radius:16px 16px 0 0;max-height:85vh;display:flex;flex-direction:column;border-top:1px solid var(--line);}
+.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.modal-body{overflow-y:auto;padding:12px 18px;}
+.modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;}
+.close-x{background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;}
+.top-actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.small-note{font-size:11px;color:var(--text-dim);margin-top:4px;}
+
+.admin-note{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-dim);margin-bottom:14px;line-height:1.5;}
+.group-row{cursor:pointer;}
+.group-row:hover{color:var(--gold);}
+.tag{font-size:9px;padding:1px 6px;border-radius:8px;border:1px solid var(--line);color:var(--text-dim);margin-left:6px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ================================================================
+   1) CONFIGURA TU PROYECTO DE FIREBASE AQUÍ
+   ================================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBjGia57v5CLiv_vFda2EoEOFAS_yGTzzk",
+  authDomain: "tradingcard-77b63.firebaseapp.com",
+  projectId: "tradingcard-77b63",
+  storageBucket: "tradingcard-77b63.firebasestorage.app",
+  messagingSenderId: "585119773760",
+  appId: "1:585119773760:web:3251c825c6383376579ba5"
+};
+
+/* Contraseña simple del panel admin (cámbiala antes de publicar) */
+const ADMIN_PASSWORD = "mundial2026";
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+/* ================================================================
+   2) CHECKLIST OFICIAL (transcrito del PDF de Panini/Adrenalyn XL
+   FIFA World Cup 2026). Formato por línea: num|nombre|seccion|etiqueta
+   Algunas entradas están marcadas (revisar) donde el escaneo no era
+   legible con certeza — corrígelas desde el Panel Admin.
+   ================================================================ */
+const CARDS_TSV = `
+1|Panini Logo|PANINI|SPECIAL
+1|Emblema Oficial|FWC|SPECIAL
+2|Emblema Oficial|FWC|SPECIAL
+3|Mascotas Oficiales|FWC|SPECIAL
+4|Eslogan Oficial|FWC|SPECIAL
+5|Balón Oficial|FWC|SPECIAL
+6|Canadá - Países y Ciudades Sede|FWC|SPECIAL
+7|México - Países y Ciudades Sede|FWC|SPECIAL
+8|EE.UU. - Países y Ciudades Sede|FWC|SPECIAL
+9|Italia 1934 - Historia del Mundial|FWC|SPECIAL
+10|Uruguay 1950 - Historia del Mundial|FWC|SPECIAL
+11|Alemania Occidental 1954 - Historia del Mundial|FWC|SPECIAL
+12|Brasil 1962 - Historia del Mundial|FWC|SPECIAL
+13|Alemania Occidental 1974 - Historia del Mundial|FWC|SPECIAL
+14|Argentina 1986 - Historia del Mundial|FWC|SPECIAL
+15|Brasil 1994 - Historia del Mundial|FWC|SPECIAL
+16|Brasil 2002 - Historia del Mundial|FWC|SPECIAL
+17|Italia 2006 - Historia del Mundial|FWC|SPECIAL
+18|Alemania 2014 - Historia del Mundial|FWC|SPECIAL
+19|Argentina 2022 - Historia del Mundial|FWC|SPECIAL
+1|Team Logo|ALG|LOGO
+2|Alexis Guendouz|ALG|
+3|Ramy Bensebaini|ALG|
+4|Youcef Atal|ALG|
+5|Rayan Aït-Nouri|ALG|
+6|Mohamed Amine Tougai|ALG|
+7|Aïssa Mandi|ALG|
+8|Ismael Bennacer|ALG|
+9|Houssem Aouar|ALG|
+10|Hicham Boudaoui|ALG|
+11|Ramiz Zerrouki|ALG|
+12|Nabil Bentaleb|ALG|
+13|Team Photo|ALG|PHOTO
+14|Farés Chaibi|ALG|
+15|Riyad Mahrez|ALG|
+16|Said Benrahma|ALG|
+17|Anis Hadj Moussa|ALG|
+18|Amine Gouiri|ALG|
+19|Baghdad Bounedjah|ALG|
+20|Mohammed Amoura|ALG|
+1|Team Logo|ARG|LOGO
+2|Emiliano Martínez|ARG|
+3|Nahuel Molina|ARG|
+4|Cristian Romero|ARG|
+5|Nicolás Otamendi|ARG|
+6|Nicolás Tagliafico|ARG|
+7|Gonzalo Montiel|ARG|
+8|Enzo Fernández|ARG|
+9|Alexis Mac Allister|ARG|
+10|Rodrigo De Paul|ARG|
+11|Exequiel Palacios|ARG|
+12|Leandro Paredes|ARG|
+13|Team Photo|ARG|PHOTO
+14|Nico Paz|ARG|
+15|Thiago Almada|ARG|
+16|Nico González|ARG|
+17|Lionel Messi|ARG|
+18|Lautaro Martínez|ARG|
+19|Julián Álvarez|ARG|
+20|Giuliano Simeone|ARG|
+1|Team Logo|AUS|LOGO
+2|Mathew Ryan|AUS|
+3|Lucas Herrington|AUS|
+4|Harry Souttar|AUS|
+5|Alessandro Circati|AUS|
+6|Jordan Bos|AUS|
+7|Aziz Behich|AUS|
+8|Cameron Burgess|AUS|
+9|Lewis Miller|AUS|
+10|Milos Degenek|AUS|
+11|Jackson Irvine|AUS|
+12|Riley McGree|AUS|
+13|Team Photo|AUS|PHOTO
+14|Aiden O'Neill|AUS|
+15|Connor Metcalfe|AUS|
+16|Patrick Yazbek|AUS|
+17|Craig Goodwin|AUS|
+18|Tete Yengi|AUS|
+19|Nestory Irankunda|AUS|
+20|Mohamed Touré|AUS|
+1|Team Logo|AUT|LOGO
+2|Alexander Schlager|AUT|
+3|Patrick Pentz|AUT|
+4|David Alaba|AUT|
+5|Kevin Danso|AUT|
+6|Philipp Lienhart|AUT|
+7|Stefan Posch|AUT|
+8|Phillipp Mwene|AUT|
+9|Alexander Prass|AUT|
+10|Xaver Schlager|AUT|
+11|Marcel Sabitzer|AUT|
+12|Konrad Laimer|AUT|
+13|Team Photo|AUT|PHOTO
+14|Florian Grillitsch|AUT|
+15|Nicolas Seiwald|AUT|
+16|Romano Schmid|AUT|
+17|Patrick Wimmer|AUT|
+18|Christoph Baumgartner|AUT|
+19|Michael Gregoritsch|AUT|
+20|Marko Arnautović|AUT|
+1|Team Logo|BEL|LOGO
+2|Thibaut Courtois|BEL|
+3|Arthur Theate|BEL|
+4|Timothy Castagne|BEL|
+5|Zeno Debast|BEL|
+6|Brandon Mechele|BEL|
+7|Maxim De Cuyper|BEL|
+8|Thomas Meunier|BEL|
+9|Youri Tielemans|BEL|
+10|Amadou Onana|BEL|
+11|Nicolas Raskin|BEL|
+12|Alexis Saelemaekers|BEL|
+13|Team Photo|BEL|PHOTO
+14|Hans Vanaken|BEL|
+15|Kevin De Bruyne|BEL|
+16|Jérémy Doku|BEL|
+17|Charles De Ketelaere|BEL|
+18|Leandro Trossard|BEL|
+19|Dodi Lukebakio|BEL|
+20|Romelu Lukaku|BEL|
+1|Team Logo|BIH|LOGO
+2|Nikola Vasilj|BIH|
+3|Amer Dedić|BIH|
+4|Sead Kolašinac|BIH|
+5|Tarik Muharemović|BIH|
+6|Nihad Mujakić|BIH|
+7|Nikola Katić|BIH|
+8|Amir Hadžiahmetović|BIH|
+9|Benjamin Tahirović|BIH|
+10|Armin Gigović|BIH|
+11|Ivan Šunjić|BIH|
+12|Ivan Bašić|BIH|
+13|Team Photo|BIH|PHOTO
+14|Dženis Burnić|BIH|
+15|Esmir Bajraktarević|BIH|
+16|Amar Memić|BIH|
+17|Ermedin Demirović|BIH|
+18|Edin Džeko|BIH|
+19|Samed Baždar|BIH|
+20|Haris Tabaković|BIH|
+1|Team Logo|BRA|LOGO
+2|Alisson|BRA|
+3|Weverton|BRA|
+4|Marquinhos|BRA|
+5|Éder Militão|BRA|
+6|Gabriel Magalhães|BRA|
+7|Danilo|BRA|
+8|Wesley|BRA|
+9|Lucas Paquetá|BRA|
+10|Casemiro|BRA|
+11|Bruno Guimarães|BRA|
+12|Luiz Henrique|BRA|
+13|Team Photo|BRA|PHOTO
+14|Vinícius Júnior|BRA|
+15|Rodrygo|BRA|
+16|Neymar|BRA|
+17|Matheus Cunha|BRA|
+18|Gabriel Martinelli|BRA|
+19|Raphinha|BRA|
+20|Estêvão|BRA|
+1|Team Logo|CAN|LOGO
+2|Dayne St. Clair|CAN|
+3|Alphonso Davies|CAN|
+4|Alistair Johnston|CAN|
+5|Luc de Fougerolles|CAN|
+6|Richie Laryea|CAN|
+7|Derek Cornelius|CAN|
+8|Moïse Bombito|CAN|
+9|Alfie Jones|CAN|
+10|Stephen Eustáquio|CAN|
+11|Ismaël Koné|CAN|
+12|Jonathan Osorio|CAN|
+13|Team Photo|CAN|PHOTO
+14|Jacob Shaffelburg|CAN|
+15|Mathieu Choinière|CAN|
+16|Niko Sigur|CAN|
+17|Tajon Buchanan|CAN|
+18|Liam Millar|CAN|
+19|Cyle Larin|CAN|
+20|Jonathan David|CAN|
+1|Team Logo|CIV|LOGO
+2|Yahia Fofana|CIV|
+3|Ghislain Konan|CIV|
+4|Wilfried Singo|CIV|
+5|Odilon Kossounou|CIV|
+6|Evan N'Dicka|CIV|
+7|Willy Boly|CIV|
+8|Emmanuel Agbadou|CIV|
+9|Ousmane Diomandé|CIV|
+10|Franck Kessié|CIV|
+11|Seko Fofana|CIV|
+12|Ibrahim Sangaré|CIV|
+13|Team Photo|CIV|PHOTO
+14|Jean-Philippe Gbamin|CIV|
+15|Amad Diallo|CIV|
+16|Nicolas Pépé|CIV|
+17|Simon Adingra|CIV|
+18|Yan Diomandé|CIV|
+19|Evann Guessand|CIV|
+20|Oumar Diakité|CIV|
+1|Team Logo|COD|LOGO
+2|Lionel Mpasi|COD|
+3|Aaron Wan-Bissaka|COD|
+4|Axel Tuanzebe|COD|
+5|Arthur Masuaku|COD|
+6|Chancel Mbemba|COD|
+7|Steve Kapuadi|COD|
+8|Charles Pickel|COD|
+9|Ngal'ayel Mukau|COD|
+10|Edo Kayembe|COD|
+11|Samuel Moutoussamy|COD|
+12|Noah Sadiki|COD|
+13|Team Photo|COD|PHOTO
+14|Théo Bongonda|COD|
+15|Meschak Elia|COD|
+16|Yoane Wissa|COD|
+17|Brian Cipenga|COD|
+18|Gaël Kakuta|COD|
+19|Cédric Bakambu|COD|
+20|Nathanaël Mbuku|COD|
+1|Team Logo|COL|LOGO
+2|Camilo Vargas|COL|
+3|David Ospina|COL|
+4|Dávinson Sánchez|COL|
+5|Yerry Mina|COL|
+6|Daniel Muñoz|COL|
+7|Johan Mojica|COL|
+8|Jhon Lucumí|COL|
+9|Santiago Arias|COL|
+10|Jefferson Lerma|COL|
+11|Kevin Castaño|COL|
+12|Richard Ríos|COL|
+13|Team Photo|COL|PHOTO
+14|James Rodríguez|COL|
+15|Juan Fernando Quintero|COL|
+16|Jorge Carrascal|COL|
+17|Jhon Arias|COL|
+18|Jhon Córdoba|COL|
+19|Luis Suárez|COL|
+20|Luis Díaz|COL|
+1|Team Logo|CPV|LOGO
+2|Vozinha|CPV|
+3|Logan Costa|CPV|
+4|Pico|CPV|
+5|Diney|CPV|
+6|Steven Moreira|CPV|
+7|Wagner Pina|CPV|
+8|João Paulo|CPV|
+9|Yannick Semedo|CPV|
+10|Kevin Pina|CPV|
+11|Sidny Lopes Cabral|CPV|
+12|Jamiro Monteiro|CPV|
+13|Team Photo|CPV|PHOTO
+14|Deroy Duarte|CPV|
+15|Garry Rodrigues|CPV|
+16|Jovane Cabral|CPV|
+17|Ryan Mendes|CPV|
+18|Dailon Livramento|CPV|
+19|Willy Semedo|CPV|
+20|Nuno da Costa|CPV|
+1|Team Logo|CRO|LOGO
+2|Dominik Livaković|CRO|
+3|Duje Čaleta-Car|CRO|
+4|Joško Gvardiol|CRO|
+5|Josip Stanišić|CRO|
+6|Luka Vušković|CRO|
+7|Josip Šutalo|CRO|
+8|Kristijan Jakić|CRO|
+9|Luka Modrić|CRO|
+10|Mateo Kovačić|CRO|
+11|Martin Baturina|CRO|
+12|Lovro Majer|CRO|
+13|Team Photo|CRO|PHOTO
+14|Mario Pašalić|CRO|
+15|Petar Sučić|CRO|
+16|Ivan Perišić|CRO|
+17|Marco Pašalić|CRO|
+18|Ante Budimir|CRO|
+19|Andrej Kramarić|CRO|
+20|Franjo Ivanović|CRO|
+1|Team Logo|CUW|LOGO
+2|Eloy Room|CUW|
+3|Armando Obispo|CUW|
+4|Sherel Floranus|CUW|
+5|Jurién Gaari|CUW|
+6|Joshua Brenet|CUW|
+7|Roshon Van Eijma|CUW|
+8|Shurandy Sambo|CUW|
+9|Livano Comenencia|CUW|
+10|Godfried Roemeratoe|CUW|
+11|Juninho Bacuna|CUW|
+12|Leandro Bacuna|CUW|
+13|Team Photo|CUW|PHOTO
+14|Tahith Chong|CUW|
+15|Kenji Gorré|CUW|
+16|Tyrese Noslin|CUW|
+17|Jurgen Locadia|CUW|
+18|Brandley Kuwas|CUW|
+19|Gervane Kastaneer|CUW|
+20|Sontje Hansen|CUW|
+1|Team Logo|CZE|LOGO
+2|Matěj Kovář|CZE|
+3|Jindřich Staněk|CZE|
+4|Ladislav Krejčí|CZE|
+5|Vladimír Coufal|CZE|
+6|Jaroslav Zelený|CZE|
+7|Tomáš Holeš|CZE|
+8|David Zima|CZE|
+9|Michal Sadílek|CZE|
+10|Lukáš Provod|CZE|
+11|Lukáš Červ|CZE|
+12|Tomáš Souček|CZE|
+13|Team Photo|CZE|PHOTO
+14|Pavel Šulc|CZE|
+15|Matěj Vydra|CZE|
+16|Václav Kušej|CZE|
+17|Tomáš Chorý|CZE|
+18|Václav Černý|CZE|
+19|Adam Hložek|CZE|
+20|Patrik Schick|CZE|
+1|Team Logo|ECU|LOGO
+2|Hernán Galíndez|ECU|
+3|Gonzalo Valle|ECU|
+4|Piero Hincapié|ECU|
+5|Pervis Estupiñán|ECU|
+6|Willian Pacho|ECU|
+7|Ángelo Preciado|ECU|
+8|Joel Ordóñez|ECU|
+9|Moisés Caicedo|ECU|
+10|Alan Franco|ECU|
+11|Kendry Páez|ECU|
+12|Pedro Vite|ECU|
+13|Team Photo|ECU|PHOTO
+14|John Yeboah|ECU|
+15|Jordy Caicedo|ECU|
+16|Gonzalo Plata|ECU|
+17|Nilson Angulo|ECU|
+18|Jeremy Arévalo|ECU|
+19|Kevin Rodríguez|ECU|
+20|Enner Valencia|ECU|
+1|Team Logo|EGY|LOGO
+2|Mohamed El Shenawy|EGY|
+3|Mohamed Hany|EGY|
+4|Karim Hafez|EGY|
+5|Yasser Ibrahim|EGY|
+6|Mohamed Abdelmonem|EGY|
+7|Ramy Rabia|EGY|
+8|Hossam Abdelmaguid|EGY|
+9|Ahmed Fatouh|EGY|
+10|Marwan Attia|EGY|
+11|Zizo|EGY|
+12|Hamdy Fathy|EGY|
+13|Team Photo|EGY|PHOTO
+14|Mohannad Lashin|EGY|
+15|Emam Ashour|EGY|
+16|Ibrahim Adel|EGY|
+17|Mohamed Salah|EGY|
+18|Mostafa Mohamed|EGY|
+19|Trézéguet|EGY|
+20|Omar Marmoush|EGY|
+1|Team Logo|ENG|LOGO
+2|Jordan Pickford|ENG|
+3|John Stones|ENG|
+4|Marc Guéhi|ENG|
+5|Ezri Konsa|ENG|
+6|Djed Spence|ENG|
+7|Reece James|ENG|
+8|Dan Burn|ENG|
+9|Jordan Henderson|ENG|
+10|Declan Rice|ENG|
+11|Jude Bellingham|ENG|
+12|Ivan Toney|ENG|
+13|Team Photo|ENG|PHOTO
+14|Morgan Rogers|ENG|
+15|Anthony Gordon|ENG|
+16|Elliot Anderson|ENG|
+17|Bukayo Saka|ENG|
+18|Harry Kane|ENG|
+19|Marcus Rashford|ENG|
+20|Ollie Watkins|ENG|
+1|Team Logo|ESP|LOGO
+2|Unai Simón|ESP|
+3|Pau Cubarsí|ESP|
+4|Aymeric Laporte|ESP|
+5|Marc Pubill|ESP|
+6|Pedro Porro|ESP|
+7|Marcos Llorente|ESP|
+8|Marc Cucurella|ESP|
+9|Martín Zubimendi|ESP|
+10|Rodri|ESP|
+11|Pedri|ESP|
+12|Fabián Ruiz|ESP|
+13|Team Photo|ESP|PHOTO
+14|Mikel Merino|ESP|
+15|Lamine Yamal|ESP|
+16|Dani Olmo|ESP|
+17|Nico Williams|ESP|
+18|Ferran Torres|ESP|
+19|Borja Iglesias|ESP|
+20|Mikel Oyarzabal|ESP|
+1|Team Logo|FRA|LOGO
+2|Mike Maignan|FRA|
+3|Théo Hernández|FRA|
+4|William Saliba|FRA|
+5|Jules Koundé|FRA|
+6|Ibrahima Konaté|FRA|
+7|Dayot Upamecano|FRA|
+8|Lucas Digne|FRA|
+9|Aurélien Tchouaméni|FRA|
+10|Warren Zaïre-Emery|FRA|
+11|Manu Koné|FRA|
+12|Adrien Rabiot|FRA|
+13|Team Photo|FRA|PHOTO
+14|Michael Olise|FRA|
+15|Ousmane Dembélé|FRA|
+16|Bradley Barcola|FRA|
+17|Désiré Doué|FRA|
+18|Marcus Thuram|FRA|
+19|Rayan Cherki|FRA|
+20|Kylian Mbappé|FRA|
+1|Team Logo|GER|LOGO
+2|Manuel Neuer|GER|
+3|Jonathan Tah|GER|
+4|David Raum|GER|
+5|Nico Schlotterbeck|GER|
+6|Antonio Rüdiger|GER|
+7|Waldemar Anton|GER|
+8|Ridle Baku|GER|
+9|Maximilian Mittelstädt|GER|
+10|Joshua Kimmich|GER|
+11|Florian Wirtz|GER|
+12|Felix Nmecha|GER|
+13|Team Photo|GER|PHOTO
+14|Leon Goretzka|GER|
+15|Jamal Musiala|GER|
+16|Lennart Karl|GER|
+17|Kai Havertz|GER|
+18|Leroy Sané|GER|
+19|Karim Adeyemi|GER|
+20|Nick Woltemade|GER|
+1|Team Logo|GHA|LOGO
+2|Lawrence Ati-Zigi|GHA|
+3|Baba Abdul Rahman|GHA|
+4|Jerome Opoku|GHA|
+5|Alidu Seidu|GHA|
+6|Derrick Luckassen|GHA|
+7|Gideon Mensah|GHA|
+8|Caleb Yirenkyi|GHA|
+9|Abdul Issahaku Fatawu|GHA|
+10|Thomas Partey|GHA|
+11|Elisha Owusu|GHA|
+12|Kamaldeen Sulemana|GHA|
+13|Team Photo|GHA|PHOTO
+14|Ernest Nuamah|GHA|
+15|Iñaki Williams|GHA|
+16|Jordan Ayew|GHA|
+17|Brandon Thomas-Asante|GHA|
+18|Prince Kwabena Adu|GHA|
+19|Christopher Bonsu Baah|GHA|
+20|Antoine Semenyo|GHA|
+1|Team Logo|HAI|LOGO
+2|Johny Placide|HAI|
+3|Carlens Arcus|HAI|
+4|Martin Expérience|HAI|
+5|Jean-Kevin Duverne|HAI|
+6|Ricardo Adé|HAI|
+7|Duke Lacroix|HAI|
+8|Garven Métusala|HAI|
+9|Hannes Delcroix|HAI|
+10|Leverton Pierre|HAI|
+11|Danley Jean Jacques|HAI|
+12|Jean-Ricner Bellegarde|HAI|
+13|Team Photo|HAI|PHOTO
+14|Christopher Attys|HAI|
+15|Derrick Etienne Jr.|HAI|
+16|Josué Casimir|HAI|
+17|Ruben Providence|HAI|
+18|Duckens Nazon|HAI|
+19|Louicius Deedson|HAI|
+20|Frantzdy Pierrot|HAI|
+1|Team Logo|IRN|LOGO
+2|Alireza Beiranvand|IRN|
+3|Ali Nemati|IRN|
+4|Ehsan Hajsafi|IRN|
+5|Milad Mohammadi|IRN|
+6|Shoja Khalilzadeh|IRN|
+7|Ramin Rezaeian|IRN|
+8|Hossein Kanaani|IRN|
+9|Daniyal Eiri|IRN|
+10|Saleh Hardani|IRN|
+11|Saeid Ezatolahi|IRN|
+12|Saman Ghoddos|IRN|
+13|Team Photo|IRN|PHOTO
+14|Mehdi Torabi|IRN|
+15|Roozbeh Cheshmi|IRN|
+16|Mohammad Mohebi|IRN|
+17|Denis Dargahi|IRN|
+18|Mehdi Taremi|IRN|
+19|Alireza Jahanbakhsh|IRN|
+20|Mehdi Ghayedi|IRN|
+1|Team Logo|IRQ|LOGO
+2|Jalal Hassan|IRQ|
+3|Rebin Sulaka|IRQ|
+4|Hussein Ali|IRQ|
+5|Akam Hashim|IRQ|
+6|Merchas Doski|IRQ|
+7|Zaid Tahseen|IRQ|
+8|Manaf Younis|IRQ|
+9|Zidane Iqbal|IRQ|
+10|Amir Al-Ammari|IRQ|
+11|Ibrahim Bayesh|IRQ|
+12|Ali Jasim|IRQ|
+13|Team Photo|IRQ|PHOTO
+14|Youssef Amyn|IRQ|
+15|Aimar Sher|IRQ|
+16|Marko Farji|IRQ|
+17|Ahmed Qasim|IRQ|
+18|Ali Al-Hamadi|IRQ|
+19|Aymen Hussein|IRQ|
+20|Mohanad Ali|IRQ|
+1|Team Logo|JOR|LOGO
+2|Yazeed Abulaila|JOR|
+3|Ihsan Haddad|JOR|
+4|Mohammad Abu Hashish|JOR|
+5|Yazan Al-Arab|JOR|
+6|Abdallah Nasib|JOR|
+7|Saleem Obaid|JOR|
+8|Mohammad Abu Alnadi|JOR|
+9|Ibrahim Saadeh|JOR|
+10|Nizar Al-Rashdan|JOR|
+11|Noor Al-Rawabdeh|JOR|
+12|Mohannad Abu Taha|JOR|
+13|Team Photo|JOR|PHOTO
+14|Amer Jamous|JOR|
+15|Musa Al-Taamari|JOR|
+16|Odeh Al Fakhouri|JOR|
+17|Mahmoud Al-Mardi|JOR|
+18|Ali Olwan|JOR|
+19|Mohammad Abu Zrayq|JOR|
+20|Ibrahim Sabra|JOR|
+1|Team Logo|JPN|LOGO
+2|Zion Suzuki|JPN|
+3|Keisuke Osako|JPN|
+4|Ayumu Seko|JPN|
+5|Junnosuke Suzuki|JPN|
+6|Shogo Taniguchi|JPN|
+7|Tsuyoshi Watanabe|JPN|
+8|Kaishu Sano|JPN|
+9|Yuki Soma|JPN|
+10|Ao Tanaka|JPN|
+11|Daichi Kamada|JPN|
+12|Takefusa Kubo|JPN|
+13|Team Photo|JPN|PHOTO
+14|Ritsu Doan|JPN|
+15|Keito Nakamura|JPN|
+16|Yuto Nagatomo|JPN|
+17|Shuto Machino|JPN|
+18|Junya Ito|JPN|
+19|Koki Ogawa|JPN|
+20|Ayase Ueda|JPN|
+1|Team Logo|KOR|LOGO
+2|Hyeon-woo Jo|KOR|
+3|Seung-Gyu Kim|KOR|
+4|Min-jae Kim|KOR|
+5|Yu-min Cho|KOR|
+6|Young-woo Seol|KOR|
+7|Han-beom Lee|KOR|
+8|Tae-seok Lee|KOR|
+9|Myung-jae Lee|KOR|
+10|Jae-sung Lee|KOR|
+11|In-beom Hwang|KOR|
+12|Kang-in Lee|KOR|
+13|Team Photo|KOR|PHOTO
+14|Seung-ho Paik|KOR|
+15|Jens Castrop|KOR|
+16|Dongg-yeong Lee|KOR|
+17|Gue-sung Cho|KOR|
+18|Heung-min Son|KOR|
+19|Hee-chan Hwang|KOR|
+20|Hyeon-Gyu Oh|KOR|
+1|Team Logo|KSA|LOGO
+2|Nawaf Alaqidi|KSA|
+3|Abdulelah Al-Amri|KSA|
+4|Saud Abdulhamid|KSA|
+5|Ali Lajami|KSA|
+6|Jihad Thakri|KSA|
+7|Moteb Al-Harbi|KSA|
+8|Hassan Altambakti|KSA|
+9|Musab Aljuwayr|KSA|
+10|Ziyad Aljohani|KSA|
+11|Abdullah Alkhaibari|KSA|
+12|Nasser Aldawsari|KSA|
+13|Team Photo|KSA|PHOTO
+14|Saleh Abu Alshamat|KSA|
+15|Marwan Alsahafi|KSA|
+16|Salem Aldawsari|KSA|
+17|Abdulrahman Al-Aboud|KSA|
+18|Feras Al-Buraikan|KSA|
+19|Saleh Alshehri|KSA|
+20|Abdullah Al-Hamdan|KSA|
+1|Team Logo|MAR|LOGO
+2|Yassine Bounou|MAR|
+3|Munir El Kajoui|MAR|
+4|Achraf Hakimi|MAR|
+5|Noussair Mazraoui|MAR|
+6|Nayef Aguerd|MAR|
+7|Issa Diop|MAR|
+8|Chadi Riad|MAR|
+9|Anass Salah-Eddine|MAR|
+10|Sofyan Amrabat|MAR|
+11|Azzedine Ounahi|MAR|
+12|Ayyoub Bouaddi|MAR|
+13|Team Photo|MAR|PHOTO
+14|Bilal El Khannouss|MAR|
+15|Ismael Saibari|MAR|
+16|Chemsdine Talbi|MAR|
+17|Abde Ezzalzouli|MAR|
+18|Soufiane Rahimi|MAR|
+19|Brahim Díaz|MAR|
+20|Ayoub El Kaabi|MAR|
+1|Team Logo|MEX|LOGO
+2|Guillermo Ochoa|MEX|
+3|Johan Vásquez|MEX|
+4|Jorge Sánchez|MEX|
+5|César Montes|MEX|
+6|Jesús Gallardo|MEX|
+7|Israel Reyes|MEX|
+8|Diego Laínez|MEX|
+9|Carlos Rodríguez|MEX|
+10|Edson Álvarez|MEX|
+11|Orbelín Pineda|MEX|
+12|Luis Chávez|MEX|
+13|Team Photo|MEX|PHOTO
+14|Érick Sánchez|MEX|
+15|Hirving Lozano|MEX|
+16|Santiago Giménez|MEX|
+17|Raúl Jiménez|MEX|
+18|Alexis Vega|MEX|
+19|Roberto Alvarado|MEX|
+20|César Huerta|MEX|
+1|Team Logo|NED|LOGO
+2|Bart Verbruggen|NED|
+3|Virgil van Dijk|NED|
+4|Micky van de Ven|NED|
+5|Jurriën Timber|NED|
+6|Denzel Dumfries|NED|
+7|Nathan Aké|NED|
+8|Jorrel Hato|NED|
+9|Jan Paul van Hecke|NED|
+10|Tijjani Reijnders|NED|
+11|Ryan Gravenberch|NED|
+12|Teun Koopmeiners|NED|
+13|Team Photo|NED|PHOTO
+14|Frenkie de Jong|NED|
+15|Crysencio Summerville|NED|
+16|Justin Kluivert|NED|
+17|Memphis Depay|NED|
+18|Donyell Malen|NED|
+19|Wout Weghorst|NED|
+20|Cody Gakpo|NED|
+1|Team Logo|NOR|LOGO
+2|Ørjan Nyland|NOR|
+3|Julian Ryerson|NOR|
+4|Leo Østigård|NOR|
+5|Kristoffer Vassbakk Ajer|NOR|
+6|Marcus Holmgren Pedersen|NOR|
+7|David Møller Wolfe|NOR|
+8|Torbjørn Heggem|NOR|
+9|Morten Thorsby|NOR|
+10|Martin Ødegaard|NOR|
+11|Sander Berge|NOR|
+12|Andreas Schjelderup|NOR|
+13|Team Photo|NOR|PHOTO
+14|Patrick Berg|NOR|
+15|Erling Haaland|NOR|
+16|Alexander Sørloth|NOR|
+17|Fredrik Bjørkan|NOR|
+18|Jørgen Strand Larsen|NOR|
+19|Antonio Nusa|NOR|
+20|Oscar Bobb|NOR|
+1|Team Logo|NZL|LOGO
+2|Max Crocombe|NZL|
+3|Alex Paulsen|NZL|
+4|Michael Boxall|NZL|
+5|Liberato Cacace|NZL|
+6|Tim Payne|NZL|
+7|Tyler Bindon|NZL|
+8|Francis de Vries|NZL|
+9|Finn Surman|NZL|
+10|Joe Bell|NZL|
+11|Sarpreet Singh|NZL|
+12|Ryan Thomas|NZL|
+13|Team Photo|NZL|PHOTO
+14|Matthew Garbett|NZL|
+15|Marko Stamenić|NZL|
+16|Ben Old|NZL|
+17|Chris Wood|NZL|
+18|Elijah Just|NZL|
+19|Callum McCowatt|NZL|
+20|Kosta Barbarouses|NZL|
+1|Team Logo|PAN|LOGO
+2|Orlando Mosquera|PAN|
+3|Luis Mejía|PAN|
+4|Fidel Escobar|PAN|
+5|Andrés Andrade|PAN|
+6|Michael Amir Murillo|PAN|
+7|Eric Davis|PAN|
+8|José Córdoba|PAN|
+9|César Blackman|PAN|
+10|Cristian Martínez|PAN|
+11|Aníbal Godoy|PAN|
+12|Adalberto Carrasquilla|PAN|
+13|Team Photo|PAN|PHOTO
+14|Yoel Bárcenas|PAN|
+15|Carlos Harvey|PAN|
+16|Ismael Díaz|PAN|
+17|José Fajardo|PAN|
+18|Cecilio Waterman|PAN|
+19|José Luis Rodríguez|PAN|
+20|Alberto Quintero|PAN|
+1|Team Logo|PAR|LOGO
+2|Roberto Fernández|PAR|
+3|Orlando Gill|PAR|
+4|Gustavo Gómez|PAR|
+5|Fabián Balbuena|PAR|
+6|Juan José Cáceres|PAR|
+7|Omar Alderete|PAR|
+8|Junior Alonso|PAR|
+9|Braian Ojeda|PAR|
+10|Diego Gómez|PAR|
+11|Damián Bobadilla|PAR|
+12|Andrés Cubas|PAR|
+13|Team Photo|PAR|PHOTO
+14|Matías Galarza Fonda|PAR|
+15|Julio Enciso|PAR|
+16|Alejandro Romero Gamarra|PAR|
+17|Miguel Almirón|PAR|
+18|Ramón Sosa|PAR|
+19|Gustavo Caballero|PAR|
+20|Antonio Sanabria|PAR|
+1|Team Logo|POR|LOGO
+2|Diogo Costa|POR|
+3|José Sá|POR|
+4|Rúben Dias|POR|
+5|João Cancelo|POR|
+6|Diogo Dalot|POR|
+7|Nuno Mendes|POR|
+8|Gonçalo Inácio|POR|
+9|Bernardo Silva|POR|
+10|Bruno Fernandes|POR|
+11|Rúben Neves|POR|
+12|Vitinha|POR|
+13|Team Photo|POR|PHOTO
+14|João Neves|POR|
+15|Cristiano Ronaldo|POR|
+16|Francisco Trincão|POR|
+17|João Félix|POR|
+18|Gonçalo Ramos|POR|
+19|Pedro Neto|POR|
+20|Rafael Leão|POR|
+1|Team Logo|QAT|LOGO
+2|Meshaal Barsham|QAT|
+3|Sultan Al-Brake|QAT|
+4|Lucas Mendes|QAT|
+5|Homam Ahmed|QAT|
+6|Boualem Khoukhi|QAT|
+7|Pedro Miguel|QAT|
+8|Tarek Salman|QAT|
+9|Mohamed Al-Mannai|QAT|
+10|Karim Boudiaf|QAT|
+11|Assim Madibo|QAT|
+12|Ahmed Fatehi|QAT|
+13|Team Photo|QAT|PHOTO
+14|Mohammed Waad|QAT|
+15|Abdulaziz Hatem|QAT|
+16|Hassan Al-Haydos|QAT|
+17|Edmílson Junior|QAT|
+18|Akram Hassan Afif|QAT|
+19|Ahmed Al-Ganehi|QAT|
+20|Almoez Ali|QAT|
+1|Team Logo|RSA|LOGO
+2|Ronwen Williams|RSA|
+3|Sipho Chaine|RSA|
+4|Aubrey Modiba|RSA|
+5|Samukelo Kabini|RSA|
+6|Olwethu Makhanya|RSA|
+7|Bradley Cross|RSA|
+8|Thabang Matuludi|RSA|
+9|Khuliso Mudau|RSA|
+10|Nkosinathi Sibisi|RSA|
+11|Teboho Mokoena|RSA|
+12|Themba Zwane|RSA|
+13|Team Photo|RSA|PHOTO
+14|Ime Okon|RSA|
+15|Sphephelo Sithole|RSA|
+16|Relebohile Mofokeng|RSA|
+17|Lyle Foster|RSA|
+18|Iqraam Rayners|RSA|
+19|Mohau Nkota|RSA|
+20|Oswin Appollis|RSA|
+1|Team Logo|SCO|LOGO
+2|Angus Gunn|SCO|
+3|Jack Hendry|SCO|
+4|Kieran Tierney|SCO|
+5|Aaron Hickey|SCO|
+6|Andrew Robertson|SCO|
+7|Scott McKenna|SCO|
+8|John Souttar|SCO|
+9|Anthony Ralston|SCO|
+10|Grant Hanley|SCO|
+11|Scott McTominay|SCO|
+12|Billy Gilmour|SCO|
+13|Team Photo|SCO|PHOTO
+14|Lewis Ferguson|SCO|
+15|Ryan Christie|SCO|
+16|Kenny McLean|SCO|
+17|John McGinn|SCO|
+18|Lawrence Shankland|SCO|
+19|Ché Adams|SCO|
+20|Ben Gannon-Doak|SCO|
+1|Team Logo|SEN|LOGO
+2|Édouard Mendy|SEN|
+3|Yehvann Diouf|SEN|
+4|Moussa Niakhaté|SEN|
+5|Abdoulaye Seck|SEN|
+6|Ismail Jakobs|SEN|
+7|El Hadji Malick Diouf|SEN|
+8|Kalidou Koulibaly|SEN|
+9|Idrissa Gana Gueye|SEN|
+10|Pape Matar Sarr|SEN|
+11|Pape Gueye|SEN|
+12|Habib Diarra|SEN|
+13|Team Photo|SEN|PHOTO
+14|Lamine Camara|SEN|
+15|Sadio Mané|SEN|
+16|Ismaïla Sarr|SEN|
+17|Assane Diao|SEN|
+18|Iliman Ndiaye|SEN|
+19|Nicolas Jackson|SEN|
+20|Krépin Diatta|SEN|
+1|Team Logo|SUI|LOGO
+2|Gregor Kobel|SUI|
+3|Yvon Mvogo|SUI|
+4|Manuel Akanji|SUI|
+5|Ricardo Rodríguez|SUI|
+6|Nico Elvedi|SUI|
+7|Aurèle Amenda|SUI|
+8|Silvan Widmer|SUI|
+9|Granit Xhaka|SUI|
+10|Denis Zakaria|SUI|
+11|Remo Freuler|SUI|
+12|Fabian Rieder|SUI|
+13|Team Photo|SUI|PHOTO
+14|Ardon Jashari|SUI|
+15|Johan Manzambi|SUI|
+16|Michel Aebischer|SUI|
+17|Breel Embolo|SUI|
+18|Rubén Vargas|SUI|
+19|Dan Ndoye|SUI|
+20|Zeki Amdouni|SUI|
+1|Team Logo|SWE|LOGO
+2|Victor Johansson|SWE|
+3|Isak Hien|SWE|
+4|Gabriel Gudmundsson|SWE|
+5|Emil Holm|SWE|
+6|Victor Nilsson Lindelöf|SWE|
+7|Gustaf Lagerbielke|SWE|
+8|Lucas Bergvall|SWE|
+9|Jens Cajuste|SWE|
+10|Jesper Karlström|SWE|
+11|Yasin Ayari|SWE|
+12|Mattias Svanberg|SWE|
+13|Team Photo|SWE|PHOTO
+14|Daniel Svensson|SWE|
+15|Ken Sema|SWE|
+16|Pontus Almqvist|SWE|
+17|Isaac Kiese Thelin|SWE|
+18|Anthony Elanga|SWE|
+19|Alexander Isak|SWE|
+20|Viktor Gyökeres|SWE|
+1|Team Logo|TUN|LOGO
+2|Abdelmouhib Chamakh|TUN|
+3|Aymen Dahmen|TUN|
+4|Yan Valery|TUN|
+5|Montassar Talbi|TUN|
+6|Omar Rekik|TUN|
+7|Ali Abdi|TUN|
+8|Dylan Bronn|TUN|
+9|Ellyes Skhiri|TUN|
+10|Aïssa Laïdouni|TUN|
+11|Ferjani Sassi|TUN|
+12|Rani Khedira|TUN|
+13|Team Photo|TUN|PHOTO
+14|Hannibal Mejbri|TUN|
+15|Elias Achouri|TUN|
+16|Khalil Ayari|TUN|
+17|Anis Ben-Slimane|TUN|
+18|Ismael Gharbi|TUN|
+19|Mohamed Haj-Mahmoud|TUN|
+20|Naïm Sliti|TUN|
+1|Team Logo|TUR|LOGO
+2|Uğurcan Çakır|TUR|
+3|Mert Müldür|TUR|
+4|Zeki Çelik|TUR|
+5|Abdülkerim Bardakcı|TUR|
+6|Çağlar Söyüncü|TUR|
+7|Merih Demiral|TUR|
+8|Ferdi Kadıoğlu|TUR|
+9|Kaan Ayhan|TUR|
+10|İsmail Yüksek|TUR|
+11|Hakan Çalhanoğlu|TUR|
+12|Orkun Kökçü|TUR|
+13|Team Photo|TUR|PHOTO
+14|Arda Güler|TUR|
+15|İrfan Can Kahveci|TUR|
+16|Yunus Akgün|TUR|
+17|Can Uzun|TUR|
+18|Barış Alper Yılmaz|TUR|
+19|Kerem Aktürkoğlu|TUR|
+20|Kenan Yıldız|TUR|
+1|Team Logo|URU|LOGO
+2|Sergio Rochet|URU|
+3|Santiago Mele|URU|
+4|Ronald Araújo|URU|
+5|José María Giménez|URU|
+6|Sebastián Cáceres|URU|
+7|Mathías Olivera|URU|
+8|Guillermo Varela|URU|
+9|Facundo Torres|URU|
+10|Federico Valverde|URU|
+11|Giorgian De Arrascaeta|URU|
+12|Rodrigo Bentancur|URU|
+13|Team Photo|URU|PHOTO
+14|Manuel Ugarte|URU|
+15|Nicolás de la Cruz|URU|
+16|Maximiliano Araújo|URU|
+17|Darwin Núñez|URU|
+18|Federico Viñas|URU|
+19|Rodrigo Aguirre|URU|
+20|Facundo Pellistri|URU|
+1|Team Logo|USA|LOGO
+2|Matt Freese|USA|
+3|Chris Richards|USA|
+4|Tim Ream|USA|
+5|Mark McKenzie|USA|
+6|Alex Freeman|USA|
+7|Antonee Robinson|USA|
+8|Tyler Adams|USA|
+9|Sergino Dest|USA|
+10|Weston McKennie|USA|
+11|Christian Roldan|USA|
+12|Timothy Weah|USA|
+13|Team Photo|USA|PHOTO
+14|Gio Reyna|USA|
+15|Malik Tillman|USA|
+16|Christian Pulisic|USA|
+17|Brenden Aaronson|USA|
+18|Ricardo Pepi|USA|
+19|Haji Wright|USA|
+20|Folarin Balogun|USA|
+1|Team Logo|UZB|LOGO
+2|Utkir Yusupov|UZB|
+3|Farrukh Sayfiev|UZB|
+4|Sherzod Nasrullaev|UZB|
+5|Umar Eshmurodov|UZB|
+6|Husniddin Aliqulov|UZB|
+7|Rustamjon Ashurmatov|UZB|
+8|Khojiakbar Alijonov|UZB|
+9|Abdukodir Khusanov|UZB|
+10|Odiljon Hamrobekov|UZB|
+11|Otabek Shukurov|UZB|
+12|Jamshid Iskanderov|UZB|
+13|Team Photo|UZB|PHOTO
+14|Azizbek Turgunboev|UZB|
+15|Khojimat Erkinov|UZB|
+16|Eldor Shomurodov|UZB|
+17|Oston Urunov|UZB|
+18|Jaloliddin Masharipov|UZB|
+19|Igor Sergeev|UZB|
+20|Abbosbek Fayzullaev|UZB|
+`.trim();
+
+const SECTION_NAMES_DEFAULT = {
+  PANINI:'Panini', FWC:'Historia del Mundial',
+  ALG:'Argelia', ARG:'Argentina', AUS:'Australia', AUT:'Austria', BEL:'Bélgica',
+  BIH:'Bosnia y Herzegovina', BRA:'Brasil', CAN:'Canadá', CIV:'Costa de Marfil',
+  COD:'RD Congo', COL:'Colombia', CPV:'Cabo Verde', CRO:'Croacia', CUW:'Curazao',
+  CZE:'Chequia', ECU:'Ecuador', EGY:'Egipto', ENG:'Inglaterra', ESP:'España',
+  FRA:'Francia', GER:'Alemania', GHA:'Ghana', HAI:'Haití', IRN:'Irán', IRQ:'Irak',
+  JOR:'Jordania', JPN:'Japón', KOR:'Corea del Sur', KSA:'Arabia Saudí', MAR:'Marruecos',
+  MEX:'México', NED:'Países Bajos', NOR:'Noruega', NZL:'Nueva Zelanda', PAN:'Panamá',
+  PAR:'Paraguay', POR:'Portugal', QAT:'Catar', RSA:'Sudáfrica', SCO:'Escocia',
+  SEN:'Senegal', SUI:'Suiza', SWE:'Suecia', TUN:'Túnez', TUR:'Turquía', URU:'Uruguay',
+  USA:'Estados Unidos', UZB:'Uzbekistán'
+};
+const SECTION_ORDER = ['PANINI','FWC','ALG','ARG','AUS','AUT','BEL','BIH','BRA','CAN','CIV','COD','COL','CPV','CRO',
+'CUW','CZE','ECU','EGY','ENG','ESP','FRA','GER','GHA','HAI','IRN','IRQ','JOR','JPN','KOR','KSA','MAR','MEX','NED',
+'NOR','NZL','PAN','PAR','POR','QAT','RSA','SCO','SEN','SUI','SWE','TUN','TUR','URU','USA','UZB'];
+
+function parseCardsTSV(tsv){
+  const lines = tsv.split('\n').map(l=>l.trim()).filter(Boolean);
+  return lines.map(l=>{
+    const [num,name,section,tag] = l.split('|');
+    const n = num.trim(), sec = section.trim();
+    return { id: sec+'-'+n, num:parseInt(n,10), name:name.trim(), section:sec, tag:(tag||'').trim() };
+  });
+}
+
+/* ================================================================
+   ESTADO Y HELPERS DE FIRESTORE
+   ================================================================ */
+let state = {
+  username:null, groupCode:null, isAdmin:false,
+  checklist:null,      // {cards:[...], sectionNames:{...}}
+  me:null, members:[], membersData:{}, interests:{},
+  tab:'album', collapsed:{}, loaded:false, searchQuery:'', photoCache:{}, onlyMissing:false,
+  showHistory:false, tradeHistoryData:null,
+  adminView:'groups', adminGroups:[], adminSelected:null, adminSelectedData:null
+};
+
+async function ensureAuth(){
+  if(!auth.currentUser){
+    await auth.signInAnonymously();
+  }
+}
+
+async function getChecklist(){
+  const ref = db.collection('checklist').doc('current');
+  const snap = await ref.get();
+  if(snap.exists) return snap.data();
+  const initial = { cards: parseCardsTSV(CARDS_TSV), sectionNames: SECTION_NAMES_DEFAULT, order: SECTION_ORDER };
+  await ref.set(initial);
+  return initial;
+}
+async function saveChecklist(data){
+  await db.collection('checklist').doc('current').set(data);
+}
+
+function defaultMe(){ return { stickers:{}, counts:{} }; }
+
+async function loadGroup(){
+  const gc = state.groupCode;
+  const groupRef = db.collection('groups').doc(gc);
+  const groupSnap = await groupRef.get();
+  if(!groupSnap.exists){ await groupRef.set({ createdAt: Date.now(), interests:{} }); }
+  const groupData = (await groupRef.get()).data();
+  state.interests = groupData.interests || {};
+
+  const meRef = groupRef.collection('users').doc(state.username);
+  const meSnap = await meRef.get();
+  if(!meSnap.exists){ await meRef.set(defaultMe()); }
+  state.me = (await meRef.get()).data();
+
+  const usersSnap = await groupRef.collection('users').get();
+  const membersData = {};
+  usersSnap.forEach(doc=>{ if(doc.id !== state.username) membersData[doc.id] = doc.data(); });
+  state.members = Object.keys(membersData);
+  state.membersData = membersData;
+  state.loaded = true;
+}
+
+async function saveMe(){ await db.collection('groups').doc(state.groupCode).collection('users').doc(state.username).set(state.me); }
+async function saveInterests(){ await db.collection('groups').doc(state.groupCode).update({ interests: state.interests }); }
+
+function allCards(){ return state.checklist.cards; }
+function cardsBySection(sec){ return allCards().filter(c=>c.section===sec); }
+function labelFor(card){ return { title: card.name, sub: card.tag || ('#'+card.num) }; }
+
+function statusOf(dataObj, id){ return (dataObj.stickers && dataObj.stickers[id]) || 0; }
+function countOf(dataObj, id){ return (dataObj.counts && dataObj.counts[id]) || 2; }
+function myProgress(){ return Object.values(state.me.stickers||{}).filter(s=>s>0).length; }
+function progressOf(dataObj){ return Object.values(dataObj.stickers||{}).filter(s=>s>0).length; }
+
+async function cycleSticker(id){
+  const cur = statusOf(state.me, id);
+  const next = (cur+1)%3;
+  state.me.stickers[id] = next;
+  if(next===2 && !state.me.counts[id]) state.me.counts[id]=2;
+  if(next!==2) delete state.me.counts[id];
+  render(); await saveMe();
+}
+async function bumpCount(id, delta){
+  state.me.counts[id] = Math.max(2, countOf(state.me,id)+delta);
+  render(); await saveMe();
+}
+async function toggleInterest(ownerUsername, id){
+  if(!state.interests[ownerUsername]) state.interests[ownerUsername] = {};
+  if(!state.interests[ownerUsername][id]) state.interests[ownerUsername][id] = [];
+  const arr = state.interests[ownerUsername][id];
+  const i = arr.indexOf(state.username);
+  if(i>=0) arr.splice(i,1); else arr.push(state.username);
+  render(); await saveInterests();
+}
+function toggleCollapse(key){ state.collapsed[key] = !state.collapsed[key]; render(); }
+function switchTab(tab){ state.tab = tab; render(); }
+
+/* ---------- Fotos de jugadores (Wikipedia, gratuito) ---------- */
+function initialsHTML(name){
+  const words = name.replace(/\(.*?\)/g,'').trim().split(/\s+/).filter(Boolean);
+  const letters = words.slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  return `<span class="pinit">${letters||'?'}</span>`;
+}
+function placeholderFor(c){
+  if(c.tag === 'LOGO') return '🛡️';
+  if(c.tag === 'PHOTO') return '📷';
+  if(c.tag === 'SPECIAL' || c.section === 'PANINI' || c.section === 'FWC') return '⭐';
+  return initialsHTML(c.name);
+}
+function isPhotoEligible(c){
+  return c.tag !== 'LOGO' && c.tag !== 'PHOTO' && c.tag !== 'SPECIAL' && c.section !== 'PANINI' && c.section !== 'FWC';
+}
+async function fetchPlayerPhoto(name){
+  if(state.photoCache[name] !== undefined) return state.photoCache[name];
+  let url = null;
+  try{
+    const resp = await fetch('https://es.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(name.replace(/\s+/g,'_')));
+    if(resp.ok){
+      const data = await resp.json();
+      if(data.thumbnail && data.thumbnail.source) url = data.thumbnail.source;
+    }
+  }catch(e){ /* sin conexión o no encontrado */ }
+  state.photoCache[name] = url;
+  return url;
+}
+function loadPhotosCapped(cards){
+  const MAX = 90;
+  if(cards.length > MAX) return; // evita cientos de peticiones a Wikipedia de golpe (ej. "Todos" sin filtrar)
+  loadPhotosFor(cards);
+}
+function loadPhotosFor(cards){
+  cards.forEach(c=>{
+    if(!isPhotoEligible(c)) return;
+    if(state.photoCache[c.name] !== undefined){
+      const el = document.getElementById('ph-'+c.id);
+      if(el) el.innerHTML = state.photoCache[c.name] ? `<img src="${state.photoCache[c.name]}" alt="">` : initialsHTML(c.name);
+      return;
+    }
+    fetchPlayerPhoto(c.name).then(url=>{
+      const el = document.getElementById('ph-'+c.id);
+      if(!el) return;
+      el.innerHTML = url ? `<img src="${url}" alt="">` : initialsHTML(c.name);
+    });
+  });
+}
+
+/* ================================================================
+   SETUP SCREEN
+   ================================================================ */
+function renderSetup(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="setup-wrap">
+      <div class="setup-title">CROMOS<br><span>MUNDIAL 26</span></div>
+      <div class="setup-sub">Lleva el control de tu álbum y organiza cambios de repetidos con tu grupo de amigos. Solo necesitas un nombre y un código de grupo.</div>
+      <div class="field"><label>Tu nombre</label><input id="in-name" type="text" placeholder="Ej. Marta" maxlength="24"></div>
+      <div class="field"><label>Código de grupo</label><input id="in-group" type="text" placeholder="Ej. AMIGOS26" maxlength="24">
+        <div class="field-hint">Inventa uno y compártelo con tus amigos, o usa el mismo que ellos ya tengan.</div>
+      </div>
+      <button class="btn" id="btn-enter">Entrar al álbum</button>
+      <div style="text-align:center;margin-top:18px;"><button class="link-btn" id="btn-admin">Acceso administrador</button></div>
+    </div>`;
+  document.getElementById('btn-enter').onclick = async () => {
+    const name = document.getElementById('in-name').value.trim();
+    const group = document.getElementById('in-group').value.trim().toUpperCase();
+    if(!name||!group) return;
+    localStorage.setItem('cromos26-settings', JSON.stringify({username:name, groupCode:group}));
+    state.username = name; state.groupCode = group;
+    await bootData();
+    render();
+  };
+  document.getElementById('btn-admin').onclick = renderAdminLogin;
+}
+
+function renderAdminLogin(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="setup-wrap">
+      <div class="setup-title">PANEL<br><span>ADMIN</span></div>
+      <div class="setup-sub">Gestión de grupos y checklist oficial.</div>
+      <div class="field"><label>Contraseña</label><input id="in-pass" type="password"></div>
+      <button class="btn" id="btn-login">Entrar</button>
+      <div style="text-align:center;margin-top:18px;"><button class="link-btn" id="btn-back">Volver</button></div>
+    </div>`;
+  document.getElementById('btn-login').onclick = async () => {
+    const p = document.getElementById('in-pass').value;
+    if(p === ADMIN_PASSWORD){
+      state.isAdmin = true;
+      await ensureAuth();
+      state.checklist = await getChecklist();
+      await loadAdminGroups();
+      render();
+    } else { alert('Contraseña incorrecta'); }
+  };
+  document.getElementById('btn-back').onclick = render;
+}
+
+/* ================================================================
+   ADMIN PANEL
+   ================================================================ */
+async function loadAdminGroups(){
+  const snap = await db.collection('groups').get();
+  const groups = [];
+  for(const doc of snap.docs){
+    const usersSnap = await doc.ref.collection('users').get();
+    let totalGot = 0;
+    usersSnap.forEach(u=>{ totalGot += progressOf(u.data()); });
+    groups.push({ code: doc.id, memberCount: usersSnap.size, avgGot: usersSnap.size ? Math.round(totalGot/usersSnap.size) : 0 });
+  }
+  state.adminGroups = groups;
+}
+
+async function selectAdminGroup(code){
+  state.adminSelected = code;
+  const usersSnap = await db.collection('groups').doc(code).collection('users').get();
+  const members = [];
+  usersSnap.forEach(u=> members.push({ username:u.id, got: progressOf(u.data()) }));
+  state.adminSelectedData = members;
+  render();
+}
+
+async function deleteAdminGroup(code){
+  if(!confirm('¿Borrar el grupo "'+code+'" y todos sus datos? Esta acción no se puede deshacer.')) return;
+  const usersSnap = await db.collection('groups').doc(code).collection('users').get();
+  const batch = db.batch();
+  usersSnap.forEach(u=> batch.delete(u.ref));
+  batch.delete(db.collection('groups').doc(code));
+  await batch.commit();
+  state.adminSelected = null;
+  await loadAdminGroups();
+  render();
+}
+
+async function removeAdminMember(code, username){
+  if(!confirm('¿Eliminar a "'+username+'" del grupo?')) return;
+  await db.collection('groups').doc(code).collection('users').doc(username).delete();
+  await selectAdminGroup(code);
+  await loadAdminGroups();
+}
+
+function renderAdmin(){
+  const app = document.getElementById('app');
+  let body = '';
+
+  if(state.adminView === 'groups'){
+    body = `<div class="admin-note">Los grupos se crean automáticamente cuando alguien entra con un código nuevo. Aquí puedes revisarlos, ver el progreso medio y borrarlos.</div>`;
+    if(state.adminGroups.length===0){
+      body += `<div class="empty-state"><h3>Aún no hay grupos</h3>Cuando alguien entre en la app con un código, aparecerá aquí.</div>`;
+    } else {
+      body += state.adminGroups.map(g => `
+        <div class="card">
+          <div class="row group-row" onclick="selectAdminGroup('${g.code}')">
+            <div><div class="item-name mono">${g.code}</div><div class="item-sub">${g.memberCount} miembro(s) · media ${g.avgGot} cromos</div></div>
+            <span class="tag">Ver →</span>
+          </div>
+        </div>`).join('');
+    }
+    if(state.adminSelected){
+      const members = state.adminSelectedData || [];
+      body += `<div class="section-title">Grupo ${state.adminSelected}</div>`;
+      body += `<div class="card">`;
+      body += members.length ? members.map(m => `
+        <div class="row"><div class="item-name">${m.username}</div>
+          <div class="item-sub mono">${m.got}/${allCards().length}</div>
+          <button class="pill" onclick="removeAdminMember('${state.adminSelected}','${m.username}')">Quitar</button>
+        </div>`).join('') : `<div class="small-note">Sin miembros.</div>`;
+      body += `</div>`;
+      body += `<button class="btn btn-danger" onclick="deleteAdminGroup('${state.adminSelected}')">Borrar grupo completo</button>`;
+    }
+  }
+
+  if(state.adminView === 'checklist'){
+    const exportTsv = allCards().map(c => `${c.num}|${c.name}|${c.section}|${c.tag}`).join('\n');
+    const sectionNamesTxt = Object.entries(state.checklist.sectionNames).map(([k,v])=>`${k}=${v}`).join('\n');
+    body = `
+      <div class="admin-note">Edita el checklist completo (uno por línea: <span class="mono">numero|nombre|seccion|etiqueta</span>). Se aplica a todos los grupos. Copia y pega directamente desde el PDF oficial de Panini para corregir los "(revisar)".</div>
+      <button class="btn btn-ghost" style="margin-bottom:16px;" id="btn-reset-checklist">↺ Restaurar checklist de fábrica (980 cromos)</button>
+      <div class="field"><label>Cromos</label><textarea id="ta-cards" style="min-height:300px;">${exportTsv}</textarea></div>
+      <div class="field"><label>Nombres de sección (código=nombre)</label><textarea id="ta-sections">${sectionNamesTxt}</textarea></div>
+      <button class="btn" id="btn-save-checklist">Guardar checklist</button>
+    `;
+  }
+
+  app.innerHTML = `
+    <header class="topbar">
+      <div class="topbar-row"><h1>Panel Admin</h1><span class="group-code mono">modo administrador</span></div>
+      <div class="top-actions" style="margin-top:10px;">
+        <button class="btn btn-ghost btn-small" onclick="setAdminView('groups')">Grupos</button>
+        <button class="btn btn-ghost btn-small" onclick="setAdminView('checklist')">Checklist</button>
+        <button class="btn btn-ghost btn-small" onclick="logoutAdmin()">Salir</button>
+      </div>
+    </header>
+    <main>${body}</main>
+  `;
+
+  if(state.adminView === 'checklist'){
+    document.getElementById('btn-reset-checklist').onclick = async () => {
+      if(!confirm('Esto sobrescribirá el checklist actual (incluidas ediciones manuales) con los 980 cromos de fábrica del código. ¿Continuar?')) return;
+      state.checklist = { cards: parseCardsTSV(CARDS_TSV), sectionNames: SECTION_NAMES_DEFAULT, order: SECTION_ORDER };
+      await saveChecklist(state.checklist);
+      alert('Checklist restaurado a los 980 cromos de fábrica.');
+      render();
+    };
+    document.getElementById('btn-save-checklist').onclick = async () => {
+      const cardsTxt = document.getElementById('ta-cards').value;
+      const sectionsTxt = document.getElementById('ta-sections').value;
+      const cards = parseCardsTSV(cardsTxt);
+      const sectionNames = {};
+      sectionsTxt.split('\n').map(l=>l.trim()).filter(Boolean).forEach(l=>{
+        const idx = l.indexOf('=');
+        if(idx>0) sectionNames[l.slice(0,idx).trim()] = l.slice(idx+1).trim();
+      });
+      state.checklist = { cards, sectionNames, order: state.checklist.order };
+      await saveChecklist(state.checklist);
+      alert('Checklist guardado.');
+      render();
+    };
+  }
+}
+function setAdminView(v){ state.adminView = v; state.adminSelected = null; render(); }
+function logoutAdmin(){ state.isAdmin=false; render(); }
+
+/* ================================================================
+   ALBUM / REPETIDOS / AMIGOS / CAMBIOS (usuario normal)
+   ================================================================ */
+function visibleSections(){ return state.checklist.order.filter(sec => cardsBySection(sec).length>0); }
+function computeMatches(q){
+  q = (q||'').trim().toLowerCase();
+  if(!q) return null;
+  return allCards().filter(c=>{
+    const secName = (state.checklist.sectionNames[c.section]||c.section).toLowerCase();
+    return c.name.toLowerCase().includes(q) || String(c.num).includes(q) || secName.includes(q) || c.section.toLowerCase().includes(q);
+  });
+}
+
+function navSections(){ return ['__ALL__', ...visibleSections()]; }
+function currentCards(){ return state.currentSection==='__ALL__' ? allCards() : cardsBySection(state.currentSection); }
+function renderAlbum(){
+  const q = (state.searchQuery||'');
+  const navSecs = navSections();
+  if(!state.currentSection || !navSecs.includes(state.currentSection)) state.currentSection = navSecs[0];
+  const options = navSecs.map(sec=>{
+    if(sec==='__ALL__'){
+      let got=0; const total=allCards().length; for(const c of allCards()) if(statusOf(state.me,c.id)>0) got++;
+      return `<option value="__ALL__" ${state.currentSection==='__ALL__'?'selected':''}>Todos (${got}/${total})</option>`;
+    }
+    const cards = cardsBySection(sec);
+    let got=0; for(const c of cards) if(statusOf(state.me,c.id)>0) got++;
+    const name = state.checklist.sectionNames[sec] || sec;
+    return `<option value="${sec}" ${sec===state.currentSection?'selected':''}>${name} (${got}/${cards.length})</option>`;
+  }).join('');
+  return `
+    <div class="field" style="margin-bottom:10px;">
+      <input id="search-box" type="text" placeholder="Buscar por selección, número o jugador…" value="${q.replace(/"/g,'&quot;')}">
+    </div>
+    <div class="section-nav">
+      <button class="nav-arrow" id="btn-prev-sec" type="button">‹</button>
+      <select id="section-select">${options}</select>
+      <button class="nav-arrow" id="btn-next-sec" type="button">›</button>
+    </div>
+    <div class="legend" style="justify-content:space-between;">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <span><i class="leg-falta"></i>Me falta</span><span><i class="leg-tengo"></i>Tengo</span><span><i class="leg-rep"></i>Repetido</span>
+      </div>
+      <button class="pill ${state.onlyMissing?'on':''}" id="btn-only-missing" type="button">Solo lo que me falta</button>
+    </div>
+    <div id="album-results">${albumResultsHTML()}</div>
+  `;
+}
+function stickerHTML(c){
+  const st = statusOf(state.me, c.id);
+  const cls = st===0?'falta':st===1?'tengo':'repetido';
+  const badge = st===2 ? `<div class="dup-badge">x${countOf(state.me,c.id)}</div>` : '';
+  const safeName = c.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<div class="sticker ${cls}" onclick="cycleSticker('${c.id}')">${badge}<div class="pphoto" id="ph-${c.id}">${placeholderFor(c)}</div><div class="num">${c.num}</div><div class="pname">${safeName}</div></div>`;
+}
+function applyOnlyMissing(cards){
+  return state.onlyMissing ? cards.filter(c => statusOf(state.me,c.id)===0) : cards;
+}
+function currentSectionGridHTML(){
+  const cards = applyOnlyMissing(currentCards());
+  if(!cards.length) return `<div class="empty-state"><h3>${state.onlyMissing?'¡Completo!':'Sin cromos'}</h3>${state.onlyMissing?'No te falta nada aquí.':''}</div>`;
+  return `<div class="sticker-grid">${cards.map(stickerHTML).join('')}</div>`;
+}
+function albumResultsHTML(){
+  let matches = computeMatches(state.searchQuery);
+  if(matches === null) return currentSectionGridHTML();
+  matches = applyOnlyMissing(matches);
+  if(matches.length===0) return `<div class="empty-state"><h3>Sin resultados</h3>Prueba con otro nombre, número o selección.</div>`;
+  return `<div class="small-note" style="margin-bottom:10px;">${matches.length} resultado(s)</div><div class="sticker-grid">${matches.map(stickerHTML).join('')}</div>`;
+}
+function renderRepetidos(){
+  const ids = Object.keys(state.me.stickers).filter(id=>state.me.stickers[id]===2);
+  const exportBtn = `<button class="btn btn-ghost btn-small" style="width:100%;margin-bottom:14px;" onclick="exportPrintable()">🖨️ Exportar / imprimir mi lista</button>`;
+  if(ids.length===0) return exportBtn + `<div class="empty-state"><h3>Sin repetidos aún</h3>Marca cromos como "repetido" en Mi álbum y aparecerán aquí.</div>`;
+  return exportBtn + ids.map(id=>{
+    const card = allCards().find(c=>c.id===id);
+    if(!card) return '';
+    const info = labelFor(card);
+    const interested = (state.interests[state.username] && state.interests[state.username][id]) || [];
+    return `<div class="card"><div class="row">
+      <div><div class="item-name">${info.title}</div><div class="item-sub">#${card.num} · ${state.checklist.sectionNames[card.section]||card.section}</div>
+      ${interested.length?`<div class="interest-flag">★ Interesa a: ${interested.join(', ')}</div>`:''}</div>
+      <div class="stepper"><button onclick="bumpCount('${id}',-1)">–</button><span class="mono">${countOf(state.me,id)}</span><button onclick="bumpCount('${id}',1)">+</button></div>
+    </div>
+    <button class="pill" style="margin-top:8px;" onclick="unmarkRepeated('${id}')">Quitar de repetidos</button>
+    </div>`;
+  }).join('');
+}
+async function unmarkRepeated(id){
+  state.me.stickers[id] = 1;
+  delete state.me.counts[id];
+  render();
+  await saveMe();
+}
+function exportPrintable(){
+  const missing = allCards().filter(c => statusOf(state.me,c.id)===0 && c.tag!=='LOGO' && c.tag!=='PHOTO');
+  const repeated = allCards().filter(c => statusOf(state.me,c.id)===2);
+  const groupBy = (list) => {
+    const map = {};
+    list.forEach(c => { (map[c.section] = map[c.section]||[]).push(c); });
+    return map;
+  };
+  const missingGrouped = groupBy(missing);
+  const rowsHTML = (grouped) => state.checklist.order.filter(s=>grouped[s]).map(s => `
+    <h3>${state.checklist.sectionNames[s]||s}</h3>
+    <ul>${grouped[s].map(c=>`<li>#${c.num} — ${c.name}</li>`).join('')}</ul>
+  `).join('');
+  const repeatedHTML = repeated.length ? `<ul>${repeated.map(c=>`<li>#${c.num} — ${c.name} <b>(x${countOf(state.me,c.id)})</b> — ${state.checklist.sectionNames[c.section]||c.section}</li>`).join('')}</ul>` : '<p>Sin repetidos.</p>';
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Mi lista — Cromos Mundial 26</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:700px;margin:24px auto;padding:0 16px;color:#1C2419;}
+    h1{font-size:22px;margin-bottom:2px;}
+    .sub{color:#666;font-size:13px;margin-bottom:20px;}
+    h2{font-size:17px;border-bottom:2px solid #1C2419;padding-bottom:4px;margin-top:28px;}
+    h3{font-size:14px;margin:14px 0 4px;color:#444;}
+    ul{margin:0 0 6px;padding-left:20px;font-size:13px;line-height:1.5;}
+    @media print{ button{display:none;} }
+  </style></head><body>
+    <h1>Cromos Mundial 2026 — ${state.username}</h1>
+    <div class="sub">Grupo ${state.groupCode} · generado el ${new Date().toLocaleDateString('es-ES')}</div>
+    <button onclick="window.print()">Imprimir / guardar como PDF</button>
+    <h2>Tengo repetidos (${repeated.length})</h2>
+    ${repeatedHTML}
+    <h2>Me falta (${missing.length})</h2>
+    ${rowsHTML(missingGrouped)}
+  </body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+}
+function rankingHTML(){
+  const total = allCards().length;
+  const entries = [{ username: state.username + ' (tú)', got: myProgress(), isMe:true }];
+  state.members.forEach(u => entries.push({ username: u, got: progressOf(state.membersData[u]), isMe:false }));
+  entries.sort((a,b)=> b.got - a.got);
+  const medals = ['🥇','🥈','🥉'];
+  const rows = entries.map((e,i)=>{
+    const pct = total ? Math.round((e.got/total)*100) : 0;
+    return `<div class="row"><div class="item-name">${medals[i]||('#'+(i+1))} ${e.username}</div>
+      <div class="friend-progress"><i style="width:${pct}%"></i></div><div class="item-sub mono">${e.got}/${total}</div></div>`;
+  }).join('');
+  return `<div class="card">${rows}</div>`;
+}
+function renderAmigos(){
+  if(state.members.length===0) return `<div class="empty-state"><h3>Todavía estás solo</h3>Comparte el código <b class="mono">${state.groupCode}</b> con tus amigos.</div>`;
+  let html = `<div class="section-title">Ranking del grupo</div>${rankingHTML()}<div class="section-title">Repetidos disponibles</div>`;
+  html += state.members.map(uname=>{
+    const data = state.membersData[uname];
+    const got = progressOf(data);
+    const pct = Math.round((got/allCards().length)*100);
+    const dupIds = Object.keys(data.stickers).filter(id=>data.stickers[id]===2 && statusOf(state.me,id)===0);
+    const open = !!state.collapsed['friend-'+uname];
+    let dupHtml = dupIds.length===0 ? `<div class="small-note">No tiene repetidos que te falten ahora.</div>` :
+      dupIds.map(id=>{
+        const card = allCards().find(c=>c.id===id);
+        if(!card) return '';
+        const info = labelFor(card);
+        const mine = state.interests[uname] && state.interests[uname][id] && state.interests[uname][id].includes(state.username);
+        return `<div class="row"><div><div class="item-name">${info.title}</div><div class="item-sub">#${card.num} · tiene ${countOf(data,id)}</div></div>
+          <button class="pill ${mine?'on':''}" onclick="toggleInterest('${uname}','${id}')">${mine?'Te interesa ✓':'Me interesa'}</button></div>`;
+      }).join('');
+    return `<div class="card"><div class="row" style="cursor:pointer;" onclick="toggleCollapse('friend-${uname}')">
+      <div class="item-name">${uname}</div><div class="friend-progress"><i style="width:${pct}%"></i></div><div class="item-sub mono">${got}/${allCards().length}</div>
+    </div>${open?`<div style="margin-top:10px;">${dupHtml}</div>`:''}</div>`;
+  }).join('');
+  return html;
+}
+function renderCambios(){
+  const historyToggle = `<button class="link-btn" style="margin-bottom:14px;" onclick="toggleHistory()">${state.showHistory?'Ocultar historial':'📜 Ver historial de cambios'}</button>`;
+  const historyPanel = state.showHistory ? `<div class="card" id="history-panel">${historyHTML()}</div>` : '';
+  if(state.members.length===0) return historyToggle + historyPanel + `<div class="empty-state"><h3>Nada que cruzar todavía</h3>Cuando tus amigos se unan aparecerán aquí los cambios posibles.</div>`;
+  let html = historyToggle + historyPanel; let any=false;
+  for(const uname of state.members){
+    const data = state.membersData[uname];
+    const give = allCards().filter(c=>state.me.stickers[c.id]===2 && statusOf(data,c.id)===0);
+    const receive = allCards().filter(c=>data.stickers[c.id]===2 && statusOf(state.me,c.id)===0);
+    if(give.length===0 && receive.length===0) continue;
+    any = true;
+    const open = !!state.collapsed['trade-'+uname];
+    html += `<div class="card" id="trade-card-${uname}"><div class="row" style="cursor:pointer;" onclick="toggleCollapse('trade-${uname}')">
+      <div class="item-name">${uname}</div><div class="item-sub mono">Tú das ${give.length} · recibes ${receive.length}</div></div>`;
+    if(open){
+      html += `<div class="section-title">Tú le puedes dar (marca lo acordado)</div>`;
+      html += give.length ? give.map(c=>`<div class="row"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" class="trade-check" data-kind="give" data-id="${c.id}"><span class="item-name">${c.name}</span></label><span class="item-sub">#${c.num}</span></div>`).join('') : `<div class="small-note">Nada por ahora.</div>`;
+      html += `<div class="section-title">Tú puedes recibir (marca lo acordado)</div>`;
+      html += receive.length ? receive.map(c=>`<div class="row"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" class="trade-check" data-kind="recv" data-id="${c.id}"><span class="item-name">${c.name}</span></label><span class="item-sub">#${c.num}</span></div>`).join('') : `<div class="small-note">Nada por ahora.</div>`;
+      html += `<button class="btn btn-small" style="width:100%;margin-top:12px;" onclick="registerTrade('${uname}')">✅ Registrar cambio hecho</button>`;
+    }
+    html += `</div>`;
+  }
+  if(!any) return historyToggle + historyPanel + `<div class="empty-state"><h3>Sin coincidencias todavía</h3>Cuando haya repetidos que le falten a alguien, aparecerán aquí.</div>`;
+  return html;
+}
+async function registerTrade(uname){
+  const container = document.getElementById('trade-card-'+uname);
+  if(!container) return;
+  const checked = Array.from(container.querySelectorAll('.trade-check:checked'));
+  if(checked.length===0){ alert('Marca al menos un cromo del intercambio antes de registrarlo.'); return; }
+  const gaveIds = checked.filter(el=>el.dataset.kind==='give').map(el=>el.dataset.id);
+  const receivedIds = checked.filter(el=>el.dataset.kind==='recv').map(el=>el.dataset.id);
+  gaveIds.forEach(id=>{
+    const c = countOf(state.me,id) - 1;
+    if(c<=1){ state.me.stickers[id]=1; delete state.me.counts[id]; } else { state.me.counts[id]=c; }
+  });
+  receivedIds.forEach(id=>{ if(statusOf(state.me,id)===0) state.me.stickers[id]=1; });
+  await saveMe();
+  try{
+    await db.collection('groups').doc(state.groupCode).collection('trades').add({
+      date: Date.now(), userA: state.username, userB: uname, gave: gaveIds, received: receivedIds
+    });
+  }catch(e){ console.error('No se pudo guardar el historial', e); }
+  state.tradeHistoryData = null;
+  alert('¡Cambio registrado! Tu álbum ya está actualizado.');
+  render();
+}
+async function toggleHistory(){
+  state.showHistory = !state.showHistory;
+  if(state.showHistory && state.tradeHistoryData===null){
+    try{
+      const snap = await db.collection('groups').doc(state.groupCode).collection('trades').orderBy('date','desc').limit(50).get();
+      state.tradeHistoryData = snap.docs.map(d=>d.data()).filter(t=>t.userA===state.username || t.userB===state.username);
+    }catch(e){ state.tradeHistoryData = []; }
+  }
+  render();
+}
+function historyHTML(){
+  if(state.tradeHistoryData===null) return `<div class="small-note">Cargando…</div>`;
+  if(state.tradeHistoryData.length===0) return `<div class="small-note">Aún no hay cambios registrados.</div>`;
+  return state.tradeHistoryData.map(t=>{
+    const other = t.userA===state.username ? t.userB : t.userA;
+    const gaveIds = t.userA===state.username ? t.gave : t.received;
+    const recvIds = t.userA===state.username ? t.received : t.gave;
+    const nameOf = id => { const c = allCards().find(x=>x.id===id); return c?c.name:id; };
+    const date = new Date(t.date).toLocaleDateString('es-ES');
+    return `<div class="row"><div><div class="item-name">${other} · <span class="item-sub">${date}</span></div>
+      <div class="item-sub">Diste: ${gaveIds.map(nameOf).join(', ')||'—'}</div>
+      <div class="item-sub">Recibiste: ${recvIds.map(nameOf).join(', ')||'—'}</div></div></div>`;
+  }).join('');
+}
+
+function logoutUser(){
+  localStorage.removeItem('cromos26-settings');
+  state.username = null; state.groupCode = null; state.loaded = false;
+  state.me = null; state.members = []; state.membersData = {}; state.interests = {};
+  state.tab = 'album'; state.collapsed = {}; state.showHistory=false; state.tradeHistoryData=null; state.onlyMissing=false; state.searchQuery='';
+  render();
+}
+
+/* ================================================================
+   MAIN RENDER
+   ================================================================ */
+function render(){
+  const app = document.getElementById('app');
+  if(state.isAdmin){ renderAdmin(); return; }
+  if(!state.username || !state.groupCode || !state.loaded){ renderSetup(); return; }
+
+  const got = myProgress();
+  const total = allCards().length;
+  const pct = total ? Math.round((got/total)*100) : 0;
+  const repBadge = Object.values(state.me.stickers).filter(s=>s===2).length;
+  let interestBadge = 0;
+  if(state.interests[state.username]) interestBadge = Object.values(state.interests[state.username]).filter(a=>a.length>0).length;
+
+  let body = '';
+  if(state.tab==='album') body = renderAlbum();
+  else if(state.tab==='rep') body = renderRepetidos();
+  else if(state.tab==='amigos') body = renderAmigos();
+  else if(state.tab==='cambios') body = renderCambios();
+
+  app.innerHTML = `
+    <header class="topbar">
+      <div class="topbar-row"><h1>Cromos 26</h1><div style="display:flex;align-items:center;gap:10px;"><span class="group-code mono">${state.groupCode} · ${state.username}</span><button class="link-btn" onclick="logoutUser()">Salir</button></div></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label"><span>${got} / ${total}</span><span>${pct}%</span></div>
+    </header>
+    <main>${body}</main>
+    <nav class="tabbar">
+      <button class="${state.tab==='album'?'active':''}" onclick="switchTab('album')"><span class="ic">▦</span>Álbum</button>
+      <button class="${state.tab==='rep'?'active':''}" onclick="switchTab('rep')"><span class="ic">◈</span>Repetidos${repBadge?`<span class="badge">${repBadge}</span>`:''}</button>
+      <button class="${state.tab==='amigos'?'active':''}" onclick="switchTab('amigos')"><span class="ic">◎</span>Amigos</button>
+      <button class="${state.tab==='cambios'?'active':''}" onclick="switchTab('cambios')"><span class="ic">⇄</span>Cambios${interestBadge?`<span class="badge">${interestBadge}</span>`:''}</button>
+    </nav>
+  `;
+
+  if(state.tab==='album'){
+    const sb = document.getElementById('search-box');
+    if(sb){
+      sb.oninput = (e) => {
+        state.searchQuery = e.target.value;
+        document.getElementById('album-results').innerHTML = albumResultsHTML();
+        const matches = computeMatches(state.searchQuery);
+        if(matches) loadPhotosFor(matches);
+      };
+    }
+    const sel = document.getElementById('section-select');
+    if(sel){
+      sel.onchange = (e) => { state.currentSection = e.target.value; state.searchQuery=''; render(); };
+    }
+    const onlyBtn = document.getElementById('btn-only-missing');
+    if(onlyBtn){
+      onlyBtn.onclick = () => {
+        state.onlyMissing = !state.onlyMissing;
+        document.getElementById('album-results').innerHTML = albumResultsHTML();
+        onlyBtn.classList.toggle('on', state.onlyMissing);
+        const activeMatches = computeMatches(state.searchQuery);
+        loadPhotosCapped(activeMatches !== null ? applyOnlyMissing(activeMatches) : applyOnlyMissing(currentCards()));
+      };
+    }
+    const navSecs = navSections();
+    const idx = navSecs.indexOf(state.currentSection);
+    const prevBtn = document.getElementById('btn-prev-sec');
+    const nextBtn = document.getElementById('btn-next-sec');
+    if(prevBtn) prevBtn.onclick = () => { state.currentSection = navSecs[(idx-1+navSecs.length)%navSecs.length]; state.searchQuery=''; render(); };
+    if(nextBtn) nextBtn.onclick = () => { state.currentSection = navSecs[(idx+1)%navSecs.length]; state.searchQuery=''; render(); };
+
+    const activeMatches = computeMatches(state.searchQuery);
+    loadPhotosCapped(applyOnlyMissing(activeMatches !== null ? activeMatches : currentCards()));
+  }
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+async function bootData(){
+  await ensureAuth();
+  state.checklist = await getChecklist();
+  await loadGroup();
+}
+async function init(){
+  const app = document.getElementById('app');
+  app.innerHTML = `<div class="setup-wrap"><div class="setup-title">CROMOS<br><span>MUNDIAL 26</span></div><div class="setup-sub">Cargando…</div></div>`;
+  const saved = localStorage.getItem('cromos26-settings');
+  if(saved){
+    const s = JSON.parse(saved);
+    state.username = s.username; state.groupCode = s.groupCode;
+    await bootData();
+  }
+  render();
+}
+init();
+</script>
+</body>
+</html>
